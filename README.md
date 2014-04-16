@@ -1,7 +1,6 @@
-##把书读薄之《Advanced Programming in the Unix Environment》
+#把书读薄之《Advanced Programming in the Unix Environment》
 
-####前言
----------------------------------------
+##前言
 既然读书，就把它读薄。  
 在学习C语言的时候我读到过一句话，说C语言并不是个复杂的语言，因此介绍C语言的书没必要太长。我觉得很合心意，然后就喜欢上这个语言——谁会不喜欢简洁的设计呢？  
 但并非所有的语言或设计都是如此，比如操作系统， 它本身就是个庞大复杂的家伙，是许多人协作劳动的成果并充满了繁多的细节。幸运的是有一种人有提炼总结的特异功能，能像炼金术士一样把知识归纳总结重新浓缩提炼，再次呈现出来的时候不失原味又井井有条，所有的学习者都因为他们的智慧受益。W. Richard Stevens就是这样的炼金术士，他的《Advanced Programming in the Unix Environment》和《UNIX Network Programming》都是了不起的创造和作品。我崇拜这样的人。  
@@ -12,8 +11,7 @@
 
 
 
-####纲要
----------------------------------------
+##纲要
 简单说来，Unix环境给程序员提供的就是一系列的系统调用(System Call)和C库函数(C Library Function)，程序员通过在程序中调用这两者来使用操作系统的服务。因此本质上学习《Advanced Programming in the Unix Environment》就是学习这些系统调用(System Call)和C库函数(C Library Function)，但如果认为《Advanced Programming in the Unix Environment》仅仅是一本接口手册，就有点儿买椟还珠了。这本书的经典之处就在于它不仅把这些接口函数的讲解分门别类，描绘了接口背后Unix系统的相关设计和原理，在辅以了丰富的实例代码来展示怎样使用这些接口，与一般的手册可谓是云泥之别。  
 
 我认为Unix环境编程的知识最重要的就4个方面，这4个方面占了Unix环境编程知识中的80%以上，掌握之后基本认为对Unix系统胸有成竹了。它们是：
@@ -31,8 +29,7 @@
 
 
 
-####Section 1: 文件系统 (File System)
----------------------------------------
+##Section 1: 文件系统 (File System)
 
 待整理：  
 1. Unix的文件系统由目录和文件构成树状结构。  
@@ -43,8 +40,7 @@
 
 
 
-####Section 2: 权限控制 (Permission Control)
----------------------------------------
+##Section 2: 权限控制 (Permission Control)
 
 待整理：  
 1. user ID，group ID，supplementary group ID——/etc/passwd  
@@ -55,8 +51,7 @@
 
 
 
-####Section 3: I/O (包括Buffered I/O 和 Unbuffered I/O)
----------------------------------------
+##Section 3: I/O (包括Buffered I/O 和 Unbuffered I/O)
 
 待整理：  
 1. 打开文件之后的内存图（process talbe -> file talbe -> v-node table）  
@@ -65,8 +60,7 @@
 
 
 
-####Section 4: 进程和线程 (Process & Thread，包括进程控制，线程控制，进程间通信(socket也是其中之一))
----------------------------------------
+##Section 4: 进程和线程 (Process & Thread，包括进程控制，线程控制，进程间通信(socket也是其中之一))
 
 待整理：  
 1. process ID  
@@ -76,8 +70,7 @@
 
 
 
-####Section 5: 其他 
----------------------------------------
+##Section 5: 其他 
 
 待整理：  
 - 5.1信号 (Signal)  
