@@ -19,8 +19,79 @@
 - I/O (包括Buffered I/O 和 Unbuffered I/O)
 - 进程和线程 (Process & Thread，包括进程控制，线程控制，进程间通信(socket也是其中之一))
 
-除取上面4个方面，剩下的内容不多，可以很快扫尾，我统称为“其他：
+除取上面4个方面，剩下的内容不多，可以很快扫尾，我统称为“其他”：
 - 信号 (Signal)
 - 时间 (Time)
 - 错误处理 (Error Handle)
 - 内存分配和管理 (Memory Allocation and Management)
+
+
+
+
+####Section 1: 文件系统 (File System)
+=================================
+
+待整理：
+1. Unix的文件系统由目录和文件构成树状结构。
+   目录结构中每个条目由文件名和inode号构成
+   inode中存了权限，文件大小，用户ID，组ID，文件类型等信息
+2. link文件，硬链，软链（符号链）
+
+
+
+
+####Section 2: 权限控制 (Permission Control)
+=================================
+
+待整理：
+1. user ID，group ID，supplementary group ID——/etc/passwd
+2. 进程的real userID，real groupID
+         effective userID， effective groupID
+3. open方式指定，以及文件的读写执行权限
+
+
+
+
+####Section 3: I/O (包括Buffered I/O 和 Unbuffered I/O)
+=================================
+
+待整理：
+1. 打开文件之后的内存图（process talbe -> file talbe -> v-node table）
+2. open read write lseek close
+
+
+
+
+####Section 4: 进程和线程 (Process & Thread，包括进程控制，线程控制，进程间通信(socket也是其中之一))
+=================================
+
+待整理：
+1. process ID
+2. thread ID（thread ID只在特定线程中有意义）
+3. 进城控制: fork exec waitpid
+
+
+
+
+####Section 5: 其他 
+=================================
+
+待整理：
+- 5.1信号 (Signal)
+
+- 5.2时间 (Time)
+自1970年以来的时间
+进程时间（1. clock time 2. user CPU time 3. System CPU time）
+
+- 5.3错误处理 (Error Handle)
+变量errno（nerver equal zero）—— <errno.h>
+函数strerror
+函数perror
+
+- 5.4内存分配和管理 (Memory Allocation and Management)
+
+
+
+
+待考虑：
+p2 Figure 1.1 Architecture of the UNIX operating system
