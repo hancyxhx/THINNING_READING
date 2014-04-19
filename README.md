@@ -75,25 +75,24 @@ Unbuffered I/O的内容可以用一张图来涵盖
 1. process ID  
 2. thread ID（thread ID只在特定线程中有意义）  
 3. 进城控制: fork exec waitpid  
-/* *******************************************************
-pid_t pid;
-char *command_buf = "ls";
-int status;
+    pid_t pid;
+    char *command_buf = "ls";
+    int status;
 
-if ((pid = fork()) < 0){
-  err_sys("fork error");
-}
-else if (pid == 0){
-  /* child */
-  execlp(command_buf, command_buf, (char *)0);
-  err_ret("couldn't execute: %s", command_buf)
-  exit(127);
-}
+    if ((pid = fork()) < 0){
+      err_sys("fork error");
+    }
+    else if (pid == 0){
+      /* child */
+      execlp(command_buf, command_buf, (char *)0);
+      err_ret("couldn't execute: %s", command_buf)
+      exit(127);
+    }
 
-/* parent */
-if ((pid = waitpid(pid, &status, 0)) < 0)
-  err_sys("waitpid error")
-******************************************************* */
+    /* parent */
+    if ((pid = waitpid(pid, &status, 0)) < 0)
+      err_sys("waitpid error")
+
 
 ##Section 5: 其他 
 
