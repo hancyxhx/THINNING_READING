@@ -1,5 +1,8 @@
 #把书读薄之《Advanced Programming in the Unix Environment》
 
+
+
+
 ##前言
 既然读书，就把它读薄。  
 在学习C语言的时候我读到过一句话，说C语言并不是个复杂的语言，因此介绍C语言的书没必要太长。我觉得很合心意，然后就喜欢上这个语言——谁会不喜欢简洁的设计呢？  
@@ -33,9 +36,10 @@
 
 待整理：  
 1. Unix的文件系统由目录和文件构成树状结构。  
-   目录结构中每个条目由文件名和inode号构成  
-   inode中存了权限，文件大小，用户ID，组ID，文件类型等信息  
+   目录结构中的每个条目由文件名和inode号构成  
+   inode中存了文件权限，文件大小，用户ID，组ID，文件类型等信息  
 2. link文件，硬链，软链（符号链）  
+3. opendir  readdir closedir  
 
 
 
@@ -43,7 +47,7 @@
 ##Section 2: 权限控制 (Permission Control)
 
 待整理：  
-1. user ID，group ID，supplementary group ID——/etc/passwd  
+1. user ID，group ID，supplementary group ID——/etc/passwd /etc/group  
 2. 进程的real userID，real groupID  
          effective userID， effective groupID  
 3. open方式指定，以及文件的读写执行权限  
@@ -52,34 +56,59 @@
 
 
 ##Section 3: I/O (包括Buffered I/O 和 Unbuffered I/O)
+###Unbuffered I/O
+Unbuffered I/O，这里的无缓存的意思其实是相对于C标准库的I/O函数而言，文件的读写都是直接用的系统调用，而C函数库的I/O函数则是在系统调用上封装了一层缓存。  
+Unbuffered I/O非常简单，只有五个系统调用O分别是open read write lseek colse，作用分别是打开文件，读文件，写文件，重定位，关闭文件  
+Unbuffered I/O的内容可以用一张图来涵盖
 
 待整理：  
 1. 打开文件之后的内存图（process talbe -> file talbe -> v-node table）  
-2. open read write lseek close  
 
 
 
 
 ##Section 4: 进程和线程 (Process & Thread，包括进程控制，线程控制，进程间通信(socket也是其中之一))
+进程是一个可执行文件运行启动之后的执行中的任务，同一个可执行文件可以被启动多次，但它们属于不同的进程，每个进程有唯一的process ID标识。
+线程之间共享进程地址空间，文件描述符，栈。因此需要线程同步来避免访问共享资源时的冲突。
 
 待整理：  
 1. process ID  
 2. thread ID（thread ID只在特定线程中有意义）  
 3. 进城控制: fork exec waitpid  
+/* *******************************************************
+pid_t pid;
+char *command_buf = "ls";
+int status;
 
+if ((pid = fork()) < 0){
+  err_sys("fork error");
+}
+else if (pid == 0){
+  /* child */
+  execlp(command_buf, command_buf, (char *)0);
+  err_ret("couldn't execute: %s", command_buf)
+  exit(127);
+}
 
-
+/* parent */
+if ((pid = waitpid(pid, &status, 0)) < 0)
+  err_sys("waitpid error")
+******************************************************* */
 
 ##Section 5: 其他 
 
 待整理：  
 - 5.1信号 (Signal)  
 
+
 - 5.2时间 (Time)  
-自1970年以来的时间  
-进程时间（1. clock time 2. user CPU time 3. System CPU time）  
+Calendar Time: 自1970年以来的秒数  
+Process Time 也叫CPU time（1. clock time 2. user CPU time 3. System CPU time）  
 
 - 5.3错误处理 (Error Handle)  
+当Unix系统调用出错时，通常变量errno（errno.h）会被设置为特定的错误值。进程中的各线程会各有一份errno的拷贝。
+该值和所有的错误常量都不会为0。
+
 变量errno（nerver equal zero）—— <errno.h>  
 函数strerror  
 函数perror  
@@ -90,4 +119,10 @@
 
 
 待考虑：  
-p2 Figure 1.1 Architecture of the UNIX operating system  
+1. p2 Figure 1.1 Architecture of the UNIX operating system  
+2. working Directory : every process has a working directory, fuction chdir  
+3. difference between unbuffered I/O & buffered I/O （buffered I/O 由C库函数提供，是用read write封装的，程序员就不再需要考虑缓存大小，并且有按行读取的选择）
+4. ISO C标准  
+IEEE POSIX标准——这套标准不仅包含系统接口（包括系统接口和库函数），还包含了shell和命令行工具集  
+The Single UNIX Specification 是IEEE POSIX的超集，严格来说只有实现了这套标准中要求的接口的操作系统才能真正的称之为UNIX系统。  
+5. sysconf pathconf fpathconf
