@@ -58,12 +58,16 @@
 ##Section 3: I/O (包括Buffered I/O 和 Unbuffered I/O)
 ###Unbuffered I/O
 Unbuffered I/O，这里的无缓存的意思其实是相对于C标准库的I/O函数而言，文件的读写都是直接用的系统调用，而C函数库的I/O函数则是在系统调用上封装了一层缓存。  
-Unbuffered I/O非常简单，只有五个系统调用O分别是open read write lseek colse，作用分别是打开文件，读文件，写文件，重定位，关闭文件  
-Unbuffered I/O的内容可以用一张图来涵盖
+Unbuffered I/O非常简单，只有五个系统调用，分别是open read write lseek colse，作用分别是打开文件，读文件，写文件，重定位，关闭文件  
+Unbuffered I/O的内容可以用一张图来涵盖，如图Fig 3.1所示  
+
+文件一旦成功用open函数打开，进程空间和内核空间就展示了这样一副逻辑结构。假设当前是通过shell命令`a.out <input.txt >output.txt`来执行a.out这个程序，则对于正在运行的a.out进程来说，相当于在文件描述符0的位置打开了input.txt作为标准输入文件，在文件描述符为1的位置打开了output.txt作为标准输出。  
+1. 这时如图左侧所示，进程空间中会有一张process table，记录当前进程打开的所有文件描述符的相关信息。process table中的每一项会有一个file pointer字段指向内核空间的File Table。
+2. 如图中部所示，File table记录的是 1. 文件的打开方式——比如input.txt就是以只读方式打开的，记录在file status flag字段。2. 当前文件偏移量current file offset 3.如果要得到具体文件的一些信息，则要顺着File Table中的v-node指针找到v-node Table
+3. 如图右侧所示，v-node表记录镇文件的大小，文件内容存储的磁盘block地址等信息。值得注意的是，与File Table不同，同一时刻无论有多少个进程打开了同一个文件，v-node表都只有一个表项。而File Table则不同，若同一文件多次打开同一文件，或者多个进程打开了同一文件，则File Table中会有多项。这非常好理解，因为每次打开的方式，还有偏移量可能不同。
 
 待整理：  
-1. 打开文件之后的内存图（process talbe -> file talbe -> v-node table）  
-
+暂无  
 
 
 
