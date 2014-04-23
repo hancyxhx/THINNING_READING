@@ -74,9 +74,9 @@ pread是多个进程共享某文件时应该采用的读函数，它的作用时
 write函数从一个打开的文件的current file offset位置写入数据，除非文件时以O_APPEND方式打开的，则每次写前都会重置current file offset到文件尾。成功写入nbyte后current file offset也会加上nbyte。  
 pwrite函数是多个进程共享某文件时应该采用的写函数，它的作用时每次lseek到指定位置然后write文件，且这两个操作是不可中断的原子操作(atomic operation)。  
 
-dup, dup2函数的作用是复制文件描述符(file descriptor)。比如进程a.out若调用`dup(1);`，那么就会在空闲描述符中选择最小的那个来复制文件描述符1，结果就会如图Fig 3.1的蓝线所示，文件描述符1和3都指向同一个file table表项。int dup2(int filedes, int filedes2)则是可以指定在文件描述符filedes2处复制文件描述符filedes，如果filedes2已经被打开了，则dup2会先关闭它然后进行复制。（dup2函数可以用于输入输出重定向，比如某个进程在描述符3的位置打开了一个文件，然后调用dup(3, STDOUT_FILENO)，就相当于将标准输出重定向到了该文件）
+dup, dup2函数的作用是复制文件描述符(file descriptor)。比如进程a.out若调用`dup(1);`，那么就会在空闲描述符中选择最小的那个来复制文件描述符1，结果就会如图Fig 3.1的蓝线所示，文件描述符1和3都指向同一个file table表项。int dup2(int filedes, int filedes2)则是可以指定在文件描述符filedes2处复制文件描述符filedes，如果filedes2已经被打开了，则dup2会先关闭它然后进行复制。（dup2函数可以用于输入输出重定向，比如某个进程在描述符3的位置打开了一个文件，然后调用dup(3, STDOUT_FILENO)，就相当于将标准输出重定向到了该文件）  
 sync函数：Unix系统中，当对文件进行写操作时采用了“延迟写”策略，即等够一定的时间或者积攒一定数量的写操作之后再真正将数据写到磁盘上，这样可以减少磁盘I/O次数。调用sync函数相当于告诉操作系统立即将“延迟写”的数据写到磁盘，但不等待磁盘写操作完成即返。fsync函数与sync函数类似，，但是是对某个对特定的文操并会等待整正的磁盘写操作完成才返回。fdatasy与fsync类似，但不想fsync函数那样写的同时也会更新文件的属性。  
-fcntl以某个打开的文件描述符为参数，可以修改该描述符相关的几种属性，包括复制文件描述符，获取或修改process table中的fd flags，获取或修改file Table中的file status flags。
+fcntl以某个打开的文件描述符为参数，可以修改该描述符相关的几种属性，包括复制文件描述符，获取或修改process table中的fd flags，获取或修改file Table中的file status flags。  
 
 待整理：  
 暂无  
