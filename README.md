@@ -14,7 +14,7 @@
 
 
 
-##纲要
+##提纲
 简单说来，Unix环境给程序员提供的就是一系列的系统调用(System Call)和C库函数(C Library Function)，程序员通过在程序中调用这两者来使用操作系统的服务。因此本质上学习《Advanced Programming in the Unix Environment》就是学习这些系统调用(System Call)和C库函数(C Library Function)，但如果认为《Advanced Programming in the Unix Environment》仅仅是一本接口手册，就有点儿买椟还珠了。这本书的经典之处就在于它不仅把这些接口函数的讲解分门别类，描绘了接口背后Unix系统的相关设计和原理，在辅以了丰富的实例代码来展示怎样使用这些接口，与一般的手册可谓是云泥之别。  
 
 我认为Unix环境编程的知识最重要的就4个方面，这4个方面占了Unix环境编程知识中的80%以上，掌握之后基本认为对Unix系统胸有成竹了。它们是：
@@ -57,19 +57,29 @@
 
 ##Section 3: I/O (包括Buffered I/O 和 Unbuffered I/O)
 ###Unbuffered I/O
-Unbuffered I/O，这里的无缓存的意思其实是相对于C标准库的I/O函数而言，文件的读写都是直接用的系统调用，而C函数库的I/O函数则是在系统调用上封装了一层缓存。  
-Unbuffered I/O非常简单，只有五个系统调用，分别是open read write lseek colse，作用分别是打开文件，读文件，写文件，重定位，关闭文件  
-Unbuffered I/O的内容可以用一张图来涵盖，如图Fig 3.1所示  
+Unbuffered I/O，即五缓存I/O，这里的无缓存的意思其实是相对于C标准库的I/O函数而言，文件的读写都是直接用的系统调用，而C函数库的I/O函数则是在系统调用上封装了一层缓存。  
+Unbuffered I/O的内容可以用一张图Fig 3.1来涵盖
 
-文件一旦成功用open函数打开，进程空间和内核空间就展示了这样一副逻辑结构。假设当前是通过shell命令`a.out <input.txt >output.txt`来执行a.out这个程序，则对于正在运行的a.out进程来说，相当于在文件描述符0的位置打开了input.txt作为标准输入文件，在文件描述符为1的位置打开了output.txt作为标准输出。  
-1. 这时如图左侧所示，进程空间中会有一张process table，记录当前进程打开的所有文件描述符的相关信息。process table中的每一项会有一个file pointer字段指向内核空间的File Table。
-2. 如图中部所示，File table记录的是 1. 文件的打开方式——比如input.txt就是以只读方式打开的，记录在file status flag字段。2. 当前文件偏移量current file offset 3.如果要得到具体文件的一些信息，则要顺着File Table中的v-node指针找到v-node Table
-3. 如图右侧所示，v-node表记录镇文件的大小，文件内容存储的磁盘block地址等信息。值得注意的是，与File Table不同，同一时刻无论有多少个进程打开了同一个文件，v-node表都只有一个表项。而File Table则不同，若同一文件多次打开同一文件，或者多个进程打开了同一文件，则File Table中会有多项。这非常好理解，因为每次打开的方式，还有偏移量可能不同。
+首先如Fig 3.1黑色部分所示，文件一旦成功用open函数打开，进程空间和内核空间就展示了这样一幅逻辑结构——由三个数据结构构成。假设当前是通过shell命令`a.out <input.txt >output.txt`来执行a.out这个程序，则对于正在运行的a.out进程来说，相当于在文件描述符0的位置打开了input.txt作为标准输入文件，在文件描述符为1的位置打开了output.txt作为标准输出。  
+1. 这时如图左侧所示，每个进程都由自己的Process Table条目，记录着当前进程打开的所有文件描述符的相关信息。相关信息有两项：(1) file descriptor flags，指示父进程结束后文件描述符依然保持打开状态 (2) file pointer字段指向内核空间的File Table。  
+2. 如图中部所示，File table记录的是 (1)file status flag记录着文件的打开方式——比如input.txt就是以只读方式打开的，相应的file status flag字段即为O_RDONLY。output的file status flag字段应为(O_WRONLY | O_APPEND | O_CREAT) (2)当前文件偏移量current file offset (3)如果要得到具体文件的一些信息，则要顺着File Table中的v-node指针找到v-node Table  
+3. 如图右侧所示，v-node表记录着文件类型，文件的拥有者，文件大小，文件内容存储的磁盘block地址等信息。  
+值得注意的是，同一时刻无论有多少个进程打开了同一个文件，v-node表都只有一个表项。而File Table则不同，若某个进程多次打开同一文件，或者多个进程打开了同一文件，则File Table中会有多项。这非常好理解，因为每次打开的方式，还有偏移量可能不同。比如如图Fig 3.2红色部分所示，此时有另外一个进程也打开了output.txt（在文件描述符4的位置），则该进程会在File Table中有单独的一个表项记录该进程的文件打开方式和偏移量，但v-node指针指向的v-node表项与a.out进程指向的是同一个。  
+
+open函数以指定的方式打开指定文件。文件打开前会作相应的权限检查，成功后则在进程和内核空间打开如Fig.3.1这样一幅逻辑结构，返回相应的文件描述符。  
+close函数关闭某文件描述符所指向的文件。若某进程没有显式关闭它所打开的文件，则当进程结束时它所打开的所有文件都会被自动被关闭。  
+lseek函数重定位File Table的current file offset字段——read或write会在current file offset处进行。  
+read函数从一个打开的文件的current file offset位置读取数据。成功读取nbyte的数据后current file offset会加上nbyte。  
+pread是多个进程共享某文件时应该采用的读函数，它的作用时每次lseek到指定位置然后read文件，且这两个操作是不可中断的原子操作(atomic operation)。  
+write函数从一个打开的文件的current file offset位置写入数据，除非文件时以O_APPEND方式打开的，则每次写前都会重置current file offset到文件尾。成功写入nbyte后current file offset也会加上nbyte。  
+pwrite函数是多个进程共享某文件时应该采用的写函数，它的作用时每次lseek到指定位置然后write文件，且这两个操作是不可中断的原子操作(atomic operation)。  
+
+dup, dup2函数的作用是复制文件描述符(file descriptor)。比如进程a.out若调用`dup(1);`，那么就会在空闲描述符中选择最小的那个来复制文件描述符1，结果就会如图Fig 3.1的蓝线所示，文件描述符1和3都指向同一个file table表项。int dup2(int filedes, int filedes2)则是可以指定在文件描述符filedes2处复制文件描述符filedes，如果filedes2已经被打开了，则dup2会先关闭它然后进行复制。（dup2函数可以用于输入输出重定向，比如某个进程在描述符3的位置打开了一个文件，然后调用dup(3, STDOUT_FILENO)，就相当于将标准输出重定向到了该文件）
+sync函数：Unix系统中，当对文件进行写操作时采用了“延迟写”策略，即等够一定的时间或者积攒一定数量的写操作之后再真正将数据写到磁盘上，这样可以减少磁盘I/O次数。调用sync函数相当于告诉操作系统立即将“延迟写”的数据写到磁盘，但不等待磁盘写操作完成即返。fsync函数与sync函数类似，，但是是对某个对特定的文操并会等待整正的磁盘写操作完成才返回。fdatasy与fsync类似，但不想fsync函数那样写的同时也会更新文件的属性。  
+fcntl以某个打开的文件描述符为参数，可以修改该描述符相关的几种属性，包括复制文件描述符，获取或修改process table中的fd flags，获取或修改file Table中的file status flags。
 
 待整理：  
 暂无  
-
-
 
 ##Section 4: 进程和线程 (Process & Thread，包括进程控制，线程控制，进程间通信(socket也是其中之一))
 进程是一个可执行文件运行启动之后的执行中的任务，同一个可执行文件可以被启动多次，但它们属于不同的进程，每个进程有唯一的process ID标识。
