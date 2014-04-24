@@ -57,13 +57,12 @@
 
 ##Section 3: I/O (包括Buffered I/O 和 Unbuffered I/O)
 ###Unbuffered I/O
-**Unbuffered I/O的系统调用非常简洁且容易理解，一共就7+3个系统调用。**  
-**7个基本I/O操作包括open，close，lseek，分别用于打开文件，关闭文件，重定位文件读写偏移。再就是2对读写函数，read和pread，write和pwrite。pread和pwrite是原子操作版的读写函数。**  
-**3个其他I/O操作是dup函数，sync函数，和fcntl。**  
-**而这7+3个系统调用都紧密的围绕在Unix系统维护的进程空间和内核空间的逻辑结构之上，可以用一幅图来全部串联起来。**  
-
-
-
+*Unbuffered I/O的系统调用非常简洁且容易理解，一共就7+3个系统调用。*  
+*7个基本I/O操作包括open，close，lseek，分别用于打开文件，关闭文件，重定位文件读写偏移。再就是2对读写函数，read和pread，write和pwrite。pread和pwrite是原子操作版的读写函数。*  
+*3个其他I/O操作是dup函数，sync函数，和fcntl。*  
+*而这7+3个系统调用都紧密的围绕在Unix系统维护的进程空间和内核空间的逻辑结构之上，可以用一幅图来全部串联起来。*  
+  
+  
 Unbuffered I/O，即无缓存I/O，这里的无缓存的意思其实是相对于C标准库的I/O函数而言，文件的读写都是直接用的系统调用，而C函数库的I/O函数则是在系统调用上封装了一层缓存。  
 Unbuffered I/O的内容完全可以涵盖在一张图中——Fig 3.1  
 
