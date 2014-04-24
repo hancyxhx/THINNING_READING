@@ -66,9 +66,9 @@
 **而这7+3个系统调用都紧密的围绕在Unix系统维护的进程空间和内核空间的逻辑结构之上，可以用一幅图来全部串联起来。**  
 
 首先如Fig 3.1黑色部分所示，文件一旦成功用open函数打开，进程空间和内核空间就展示了这样一幅逻辑结构——由三个数据结构构成。假设当前是通过shell命令`a.out <input.txt >output.txt`来执行a.out这个程序，则对于正在运行的a.out进程来说，相当于在文件描述符0的位置打开了input.txt作为标准输入文件，在文件描述符为1的位置打开了output.txt作为标准输出。  
-1. 这时如图左侧所示，每个进程都由自己的Process Table条目，记录着当前进程打开的所有文件描述符的相关信息。相关信息有两项：(1) file descriptor flags，指示父进程结束后文件描述符依然保持打开状态 (2) file pointer字段指向内核空间的File Table。  
-2. 如图中部所示，File table记录的是 (1)file status flag记录着文件的打开方式——比如input.txt就是以只读方式打开的，相应的file status flag字段即为O_RDONLY。output的file status flag字段应为(O_WRONLY | O_APPEND | O_CREAT) (2)当前文件偏移量current file offset (3)如果要得到具体文件的一些信息，则要顺着File Table中的v-node指针找到v-node Table  
-3. 如图右侧所示，v-node表记录着文件类型，文件的拥有者，文件大小，文件内容存储的磁盘block地址等信息。  
+1.    这时如图左侧所示，每个进程都由自己的Process Table条目，记录着当前进程打开的所有文件描述符的相关信息。相关信息有两项：(1) file descriptor flags，指示父进程结束后文件描述符依然保持打开状态 (2) file pointer字段指向内核空间的File Table。
+2.    如图中部所示，File table记录的是 (1)file status flag记录着文件的打开方式——比如input.txt就是以只读方式打开的，相应的file status flag字段即为O_RDONLY。output的file status flag字段应为(O_WRONLY | O_APPEND | O_CREAT) (2)当前文件偏移量current file offset (3)如果要得到具体文件的一些信息，则要顺着File Table中的v-node指针找到v-node Table
+3.    如图右侧所示，v-node表记录着文件类型，文件的拥有者，文件大小，文件内容存储的磁盘block地址等信息。
 值得注意的是，同一时刻无论有多少个进程打开了同一个文件，v-node表都只有一个表项。而File Table则不同，若某个进程多次打开同一文件，或者多个进程打开了同一文件，则File Table中会有多项。这非常好理解，因为每次打开的方式，还有偏移量可能不同。比如如图Fig 3.2红色部分所示，此时有另外一个进程也打开了output.txt（在文件描述符4的位置），则该进程会在File Table中有单独的一个表项记录该进程的文件打开方式和偏移量，但v-node指针指向的v-node表项与a.out进程指向的是同一个。  
 
 open函数以指定的方式打开指定文件。文件打开前会作相应的权限检查，成功后则在进程和内核空间打开如Fig.3.1这样一幅逻辑结构，返回相应的文件描述符。  
