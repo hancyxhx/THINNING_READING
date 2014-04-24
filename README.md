@@ -57,8 +57,13 @@
 
 ##Section 3: I/O (包括Buffered I/O 和 Unbuffered I/O)
 ###Unbuffered I/O
-Unbuffered I/O，即五缓存I/O，这里的无缓存的意思其实是相对于C标准库的I/O函数而言，文件的读写都是直接用的系统调用，而C函数库的I/O函数则是在系统调用上封装了一层缓存。  
-Unbuffered I/O的内容可以用一张图Fig 3.1来涵盖
+Unbuffered I/O的系统调用非常简洁且容易理解，一共就7+3个系统调用。  
+7个基本I/O操作包括open，close，lseek，分别用于打开文件，关闭文件，重定位文件读写偏移。再就是2对读写函数，read和pread，write和pwrite。pread和pwrite是原子操作版的读写函数。  
+3个其他I/O操作是dup函数，sync函数，和fcntl。  
+而这7+3个系统调用都紧密的围绕在Unix系统维护的进程空间和内核空间的逻辑结构之上，可以用一幅图来全部串联起来。  
+
+Unbuffered I/O，即无缓存I/O，这里的无缓存的意思其实是相对于C标准库的I/O函数而言，文件的读写都是直接用的系统调用，而C函数库的I/O函数则是在系统调用上封装了一层缓存。  
+Unbuffered I/O的内容完全可以涵盖在一张图中——Fig 3.1  
 
 首先如Fig 3.1黑色部分所示，文件一旦成功用open函数打开，进程空间和内核空间就展示了这样一幅逻辑结构——由三个数据结构构成。假设当前是通过shell命令`a.out <input.txt >output.txt`来执行a.out这个程序，则对于正在运行的a.out进程来说，相当于在文件描述符0的位置打开了input.txt作为标准输入文件，在文件描述符为1的位置打开了output.txt作为标准输出。  
 1. 这时如图左侧所示，每个进程都由自己的Process Table条目，记录着当前进程打开的所有文件描述符的相关信息。相关信息有两项：(1) file descriptor flags，指示父进程结束后文件描述符依然保持打开状态 (2) file pointer字段指向内核空间的File Table。  
@@ -75,11 +80,11 @@ write函数从一个打开的文件的current file offset位置写入数据，�
 pwrite函数是多个进程共享某文件时应该采用的写函数，它的作用时每次lseek到指定位置然后write文件，且这两个操作是不可中断的原子操作(atomic operation)。  
 
 dup, dup2函数的作用是复制文件描述符(file descriptor)。比如进程a.out若调用`dup(1);`，那么就会在空闲描述符中选择最小的那个来复制文件描述符1，结果就会如图Fig 3.1的蓝线所示，文件描述符1和3都指向同一个file table表项。int dup2(int filedes, int filedes2)则是可以指定在文件描述符filedes2处复制文件描述符filedes，如果filedes2已经被打开了，则dup2会先关闭它然后进行复制。（dup2函数可以用于输入输出重定向，比如某个进程在描述符3的位置打开了一个文件，然后调用dup(3, STDOUT_FILENO)，就相当于将标准输出重定向到了该文件）  
-sync函数：Unix系统中，当对文件进行写操作时采用了“延迟写”策略，即等够一定的时间或者积攒一定数量的写操作之后再真正将数据写到磁盘上，这样可以减少磁盘I/O次数。调用sync函数相当于告诉操作系统立即将“延迟写”的数据写到磁盘，但不等待磁盘写操作完成即返。fsync函数与sync函数类似，，但是是对某个对特定的文操并会等待整正的磁盘写操作完成才返回。fdatasy与fsync类似，但不想fsync函数那样写的同时也会更新文件的属性。  
-fcntl以某个打开的文件描述符为参数，可以修改该描述符相关的几种属性，包括复制文件描述符，获取或修改process table中的fd flags，获取或修改file Table中的file status flags。  
+sync函数：Unix系统中，当对文件进行写操作时采用了“延迟写”策略，即等够一定的时间或者积攒一定数量的写操作之后再真正将数据写到磁盘上，这样可以减少磁盘I/O次数。调用sync函数相当于告诉操作系统立即将“延迟写”的数据写到磁。但它不等待磁盘写操作完成即返。fsync函数与sync函数类似，，只不过是对某个对特定的文操并会等待真正的磁盘写操作完成才返回。fdatasy与fsync类似，但不像fsync函数那样写的同时也会更新文件的属性。  
+fcntl函数是一个多功能的函数，可以用来包括复制文件描述符，获取或修改process table中的fd flags，获取或修改file Table中的file status flags等，一共9种功能通过参数来控制。  
 
-待整理：  
-暂无  
+
+
 
 ##Section 4: 进程和线程 (Process & Thread，包括进程控制，线程控制，进程间通信(socket也是其中之一))
 进程是一个可执行文件运行启动之后的执行中的任务，同一个可执行文件可以被启动多次，但它们属于不同的进程，每个进程有唯一的process ID标识。
