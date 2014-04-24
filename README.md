@@ -57,15 +57,13 @@
 
 ##Section 3: I/O (包括Buffered I/O 和 Unbuffered I/O)
 ###Unbuffered I/O
+**Unbuffered I/O，即无缓存I/O，这里的无缓存的意思其实是相对于C标准库的I/O函数而言，文件的读写都是直接用的系统调用，而C函数库的I/O函数则是在系统调用上封装了一层缓存。**  
 **Unbuffered I/O的系统调用非常简洁且容易理解，一共就7+3个系统调用。**  
 -    **7个基本I/O操作包括open，close，lseek，分别用于打开文件，关闭文件，重定位文件读写偏移。**  
      **再就是2对读写函数，read和pread，write和pwrite。pread和pwrite是原子操作版的读写函数。**
--    **3个其他I/O操作是dup函数，sync函数，和fcntl。**  
+-    **3个其他I/O操作是dup函数，sync函数，和fcntl。**
 
 **而这7+3个系统调用都紧密的围绕在Unix系统维护的进程空间和内核空间的逻辑结构之上，可以用一幅图来全部串联起来。**  
-
-Unbuffered I/O，即无缓存I/O，这里的无缓存的意思其实是相对于C标准库的I/O函数而言，文件的读写都是直接用的系统调用，而C函数库的I/O函数则是在系统调用上封装了一层缓存。  
-Unbuffered I/O的内容完全可以涵盖在一张图中——Fig 3.1  
 
 首先如Fig 3.1黑色部分所示，文件一旦成功用open函数打开，进程空间和内核空间就展示了这样一幅逻辑结构——由三个数据结构构成。假设当前是通过shell命令`a.out <input.txt >output.txt`来执行a.out这个程序，则对于正在运行的a.out进程来说，相当于在文件描述符0的位置打开了input.txt作为标准输入文件，在文件描述符为1的位置打开了output.txt作为标准输出。  
 1. 这时如图左侧所示，每个进程都由自己的Process Table条目，记录着当前进程打开的所有文件描述符的相关信息。相关信息有两项：(1) file descriptor flags，指示父进程结束后文件描述符依然保持打开状态 (2) file pointer字段指向内核空间的File Table。  
